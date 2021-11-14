@@ -1,5 +1,4 @@
-﻿using KModkit;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,6 @@ using Rnd = UnityEngine.Random;
 
 public class DirectingButtonsScript : MonoBehaviour
 {
-
     static int _moduleIdCounter = 1;
     int _moduleID = 0;
 
@@ -20,16 +18,17 @@ public class DirectingButtonsScript : MonoBehaviour
     public TextMesh[] ColourblindTexts;
 
     //Red = 0, Yellow = 1, Green = 2, Blue = 3
-    private int[,] Colours = new int[4, 4];
+    private readonly int[,] Colours = new int[4, 4];
     private int StartingRow;
     private int StartingColumn;
     private int GoalSquare;
-    private string[][] ColoursToString = new string[4][] { new string[4], new string[4], new string[4], new string[4] };
-    private string[] CoordinateNames = { "a1", "b1", "c1", "d1", "a2", "b2", "c2", "d2", "a3", "b3", "c3", "d3", "a4", "b4", "c4", "d4" };
-    private string ColourblindColours = "RYGB";
+    private readonly string[][] ColoursToString = new string[4][] { new string[4], new string[4], new string[4], new string[4] };
+    private static readonly string[] CoordinateNames = { "a1", "b1", "c1", "d1", "a2", "b2", "c2", "d2", "a3", "b3", "c3", "d3", "a4", "b4", "c4", "d4" };
+    private static readonly string ColourblindColours = "RYGB";
     private bool ColourblindEnabled;
     private bool Pressing;
-    private Color[] ColourValues = { new Color(1, .25f, .25f), new Color(1, 1, .25f), new Color(.25f, 1, .25f), new Color(.25f, .25f, 1) };
+    private bool IsSolved;
+    private static readonly Color[] ColourValues = { new Color(1, .25f, .25f), new Color(1, 1, .25f), new Color(.25f, 1, .25f), new Color(.25f, .25f, 1) };
 
     private IEnumerable<bool> AdjacentVisitedSquares(int Row, int Column, bool[,] Visited)
     {
@@ -71,8 +70,8 @@ public class DirectingButtonsScript : MonoBehaviour
     void Calculate()
     {
         bool[,] VisitedSquares = new bool[4, 4];
-        int StartingRow = Rnd.Range(0, 4);
-        int StartingColumn = Rnd.Range(0, 4);
+        StartingRow = Rnd.Range(0, 4);
+        StartingColumn = Rnd.Range(0, 4);
         int RandomDirection = 0;
         CalcSteps:
         {
@@ -257,6 +256,7 @@ public class DirectingButtonsScript : MonoBehaviour
                 Buttons[j].GetComponent<MeshRenderer>().material.color -= new Color(0, 0.2f, 0);
             yield return new WaitForSeconds(0.15f);
         }
+        IsSolved = true;
     }
 
 #pragma warning disable 414
@@ -294,5 +294,7 @@ public class DirectingButtonsScript : MonoBehaviour
     {
         yield return true;
         Buttons[(StartingRow * 4) + StartingColumn].OnInteract();
+        while (!IsSolved)
+            yield return true;
     }
 }
